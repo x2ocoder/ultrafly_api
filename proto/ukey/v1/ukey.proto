@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package ukey.v1;
+option go_package = "ukey/v1;ukey_v1";
+
+// message UkeySetRequest {  // For the sake of sanity, we send a UkeySetRequest with a Ukey body so that it can be used immediately upon Unmarshal with other utilities
+message Ukey {
+  uint32 request_id = 1;
+  bytes generation_id = 2; // Typical 2 Byte Generation ID (Currently "ZZ") 
+  bytes app_id = 3;        // Typical 2 Byte App ID (Currently "TF")
+  bytes epc_base = 4;      // EPC Signing Key Base - Required for all ultrafly stations
+  string epc_style = 5;    // Can use this to determine the algorithm for diversification
+  bytes access_base = 6;   // Access Key Base - Required for all ultrafly stations
+  string access_style = 7; // Can use this to determine the algorithm for diversification
+  bytes kill_base = 8;     // Kill Key Base // Only Personalization@TapIt should have this
+  string kill_style = 9;   // Can use this to determine the algorithm for diversification
+  bytes confirmation = 11; // Confirmation Code to confirm this packet is real
+}
+
+message UkeySetResponse { // Set EPC Signing Base Key
+  uint32 request_id = 1;
+  bool   success = 2;
+  string message = 3;
+}
+
+
+
+// There should be a program to generate key sets
+// This is a depot@tapit program and shall save keys binary format (ProtoBuf.Wire Format) -> installation.generation.app.ukey
+
+// Generate Key Set
+// ukey -generate -installation Nichirei -generation ZZ -appid TF  -> Make Nichirei.ZZ.TF.ukey
+
+// Send all keys to depot_fruit/UkeySetRequest
+// ukey -distribute -topic depot_fruit/UkeySetRequest -allBase true -installation Nichirei -generation ZZ -appid TF  
+
+// Send all keys except kill_base to factory_fruit/UkeySetRequest
+// ukey -distribute -topic factory_fruit/UkeySetRequest -allBase false -installation Nichirei -generation ZZ -appid TF  
+
+// Send all keys except kill_base to collector_fruit/UkeySetRequest
+// ukey -distribute -topic collector_fruit/UkeySetReqeuest -allBase false -installation Nichirei -generation ZZ -appid TF
+
+// Receiving app should monitor
+// ?_fruit/UkeySetRequest and save to a local file -stateDir ~/state/ustate as configured, may activate in memory immediately
+// on operation the receiver should load the file -stateDir ~/state/ustate before fully runing
+
+// In the future multiple application ukeys can be creating using a UkeyRing ~/state/uring
+
+

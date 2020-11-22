@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package oneshelf.v1;
+option go_package = "oneshelf/v1;oneshelf_v1";
+
+message GpioMapping {
+  uint32 pin_number   = 1; // GPIO # (Linux System level)
+  string name         = 2; // Cross Hardware Board "Name" Such as "A" = Pin 0 or "A" = Pin 16 on another breakout board
+  string description  = 3; // Description of Pin for example "Leftmost input"
+  string direction    = 4; // I = Input, O = Output
+  bool   init_high    = 5; // When: Output, When InitHigh set pin to High on Boot
+  uint32 debounce_ms  = 6; // When: Input, # of Miliseconds to debounce input with
+}
+
+message OneshelfConfig {
+  string serial_port_name = 1;  // Serial Port /dev/tty.something
+
+  string mqtt_uri = 5; // MQTT Connection String "tcp://127.0.0.1:1883"
+  string mqtt_username = 6;
+  string mqtt_password = 7;
+  string mqtt_client_id = 8;
+  string mineral_path = 10; // License path 
+
+  string reader_name = 11; // "m2900x" reported to endpoint for UHF chipset identification // Used mostly in V1
+  string mac_address = 12; // "29:10:22:33:44:55" -  MAC Address of Reader (reported to endpoint for identification) // Used mostly in V1
+  string uhf_country = 13; // USA, KR, VN - Talk to your favorite developer to add more countries
+
+  string antennas_on_str = 20; //  CSV Antennas Enabled (Format: #[:Power#],...) Power # between 20-33  - Example: 0:20,3:33,5:20") ; TODO Move into structure for more per-antenna detail
+  int32 inventory_sec = 21; // seconds to wait before POSTING full inventory via HTTP (could do many scans in between inventory sends) // 60 good for shop, 2 good for factory
+  int32 rssi_pre_filter_minimum = 22; // TODO: make per-antenna -- 30-60 depending on antenna type
+
+  int32 wait_ms = 31; // 100 - miliseconds to wait before inventory rounds
+  int32 fading_ms = 32; // 1000 - miliseconds to wait before flagging as Fading")                 // 5000 good for shops; 1000 good for factory
+  int32 lost_ms = 33;  // 2000 - miliseconds to wait before flagging as Lost")                     // 15000 good for shops for brief handling; 2000 good for factory
+
+  string url_v1 = 70; // v1 charlie format - POST URL for version 1 formatted data  (rf1 to rf8) Ex http://localhost:3123/endpoint/dummy")
+  string inventory_url = 71; // (Not Implemented Yet - Doing MQTT First) v2 per-zone, delta, event info 
+  string events_url = 72; //  (Not Implemented Yet - Doing MQTT First) v2: POST URL for version 2 formatted data - Per Zone Data, Delta Reporting, Event Based Ex http://localhost:3123/endpoint/v2events")
+
+  int32 pcb_major_version = 80; // 0
+  int32 pcb_minor_version = 81; // 6
+
+  string spotlight = 90; // CSV - Spotlight MACs on debug "ABCD,1234" 
+  string verbosity = 91; // Verbosity Level (I = Info, D = Debug)
+  bool test_gpo = 92; // true = toggle GPIO Outputs
+
+  repeated GpioMapping gpio_mappings = 100;
+}

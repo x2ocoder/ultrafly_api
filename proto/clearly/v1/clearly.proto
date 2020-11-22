@@ -1,0 +1,232 @@
+syntax = "proto3";
+
+package clearly.v1;
+option go_package = "clearly/v1;clearly_v1";
+
+message Debug {
+  string key = 1;
+  int32  i1 =  10;
+  int32  i2 =  11; int32  i3 =  12;
+  int32  i4 =  13;
+}
+
+
+// All commands sent to clr/%s/c/dfev2
+message Dfev2 {
+  enum Command {  // Minimize C code generation by unioning all command variables
+        DEBUG                        = 0x0000;  // D40 2TDEA Auth Only
+        EZ_BATCH_COMMAND             = 0xE3B0;
+
+        EZ_MASTER_SETUP              = 0xE2B2;  // Converts DFEV2 from DES->EV2 AES Diversified MasterPICC Key 
+        EZ_AUTH_APP                  = 0xE2B4;  // Auth App 0x112233 with KeyRing X, KeyVer Y, with Protocol KeyX.Proto
+        EZ_APP_ENSURE                = 0xE2B5;  // Creates application with reasonable keyset defaults according to keystore setup
+
+        AUTH_2TDEA                   = 0xE221;  // D40 2TDEA Auth Only // Default delivery format
+        AUTH_ISO                     = 0xE222;  // Desfire EV1 2TDEA, 3TDEA 
+        AUTH_AES                     = 0xE223;  // Desfire EV1 AES Mode (Secure Messaging)
+        AUTH_EV2_FIRST               = 0xE224;  // Desfire EV2 First Auth AES Mode (Secure Messaging + Message Counter)
+        // AUTH_EV2_NEXT                = 0xE225;  // Desfire EV2 Non-First Auth (Secure Messaging + Msg Counter Increment) -- Just use AUTH_EV2_FIRST firstAuth = 0
+        AUTH_MASTER_DEFAULT          = 0xE2B1;  // Typically if this works, you want to immediately secure the card with EZ_MASTER_SETUP
+        AUTH_MASTER_DIVERSIFIED_EV2  = 0xE2B3; 
+        GET_FREEMEM                  = 0xE231;  // For request, just send empty PB, respond with filled PB
+        FORMAT_CARD                  = 0xE232;  // The only way to free memory on Desfire (other than deleting delegated app)
+        SET_CONFIURATION             = 0xE233;  // 7.3.3 SetConfiguration, 6.4.3.1 SetConfiguration Command - Highly variable option + option.data[25]
+        GET_VERSION                  = 0xE234;  // For request, just send empty PB, respond with filled PB
+        GET_UID                      = 0xE235;  // For request, just send empty PB, respond with filled PB
+        CHANGE_KEY                   = 0xE241;  // More general like for first PICCMaster Change
+        CHANGE_KEY_EV2               = 0xE242;  // AppliationKeySet specific changes (multiple AKS version targets)
+        INITIALIZE_KEY_SET           = 0xE243;  // AppliationKeySet specific changes (multiple AKS version targets)
+        FINALIZE_KEY_SET             = 0xE244;  // AppliationKeySet specific changes (multiple AKS version targets)
+        ROLL_KEY_SET                 = 0xE245;  // AppliationKeySet specific changes (multiple AKS version targets)
+        GET_KEY_SETTINGS             = 0xE246;  // For request, just send empty PB, respond with filled PB
+        CHANGE_KEY_SETTINGS          = 0xE247;  // For request, just send empty PB, respond with filled PB
+        GET_KEY_VERSION              = 0xE248;  // For request, just send empty PB, respond with filled PB
+        APP_CREATE                   = 0xE251;  // 6.5.5.2 Application Keys -- Table 17. Keys at application level
+        APP_DELETE                   = 0xE252;
+        APP_CREATE_DELEGATED         = 0xE253; // 6.6.2.2 For delegated application creation, the PICC level (AID 0x000000) 
+        APP_SELECT                   = 0xE254;
+        APP_GET_IDS                  = 0xE255;
+        APP_GET_DFNAMES              = 0xE256;
+        APP_GET_DELETEGATED_INFO     = 0xE257;
+        FILE_CREATE_STD              = 0xE261;
+        FILE_CREATE_BACKUP           = 0xE262;
+        FILE_CREATE_VALUE            = 0xE263;
+        FILE_CREATE_LINEAR           = 0xE264;
+        FILE_CREATE_CYCLIC           = 0xE265;
+        FILE_CREATE_TXNMAC           = 0xE266;
+        FILE_DELETE                  = 0xE267;
+        FILE_GET_IDS                 = 0xE268;  // For request, just send empty PB, respond with filled PB
+        FILE_GET_ISOIDS              = 0xE269;  // For request, just send empty PB, respond with filled PB
+        FILE_GET_SETTINGS            = 0xE26A;  // For request, just send empty PB, respond with filled PB
+        FILE_CHANGE_SETTINGS         = 0xE26B;
+
+
+        DATA_READ                    = 0xE271;
+        DATA_WRITE                   = 0xE272;
+        DATA_GET_VALUE               = 0xE273;
+        DATA_CREDIT                  = 0xE274;
+        DATA_LIMITED_CREDIT          = 0xE275;
+        DATA_DEBIT                   = 0xE276;
+        DATA_READ_RECORDS            = 0xE277;
+        DATA_WRITE_RECORD            = 0xE278;
+        DATA_UPDATE_RECORD           = 0xE279;
+        DATA_CLEAR_RECORD_FILE       = 0xE27A;
+
+        EZ_READ_RECORDS                = 0xE377;
+        EZ_READ_RECORDS_REVERSE        = 0xE378;
+        SAFETY_TIMED_DATA_WRITE_RECORD = 0xE478;
+
+        TXN_COMMIT                   = 0xE281;
+        TXN_ABORT                    = 0xE282;
+        TXN_COMMIT_READER_ID         = 0xE283;
+
+        // ISO 7.9.x SKIP
+        // VC 7.10.x SKIP
+        // Prox 7.11.x EZ
+        EZ_CONFIRM_PROX_CHECK        = 0xE3B3;
+
+        READ_SIG                     = 0xE2C1;
+
+  }
+  Command command = 1; // id for when string is missing - faster transmission
+  repeated Dfev2 commands = 2;
+
+  int32 ping_id = 3; // echo back in response
+  int32 pong_id = 4; // echo back in response
+
+  bool success = 5;    // Used in response packet
+
+  int32 error_code = 6; // Used in response packet
+  int32 fail_position = 7; // 0 index of failed command in batch
+  bool hint_deauthed = 8; // if you get this, you better reauth
+ 
+  bytes  uid =  9; // card uid for clarity and ease of use
+
+  // 32bit embedded system so most likely 32 bit int is sufficient
+  int32  i1 =  11;
+  int32  i2 =  12;
+  int32  i3 =  13;
+  int32  i4 =  14;
+  int32  i5 =  15;
+  int32  i6 =  16;
+  int32  i7 =  17;
+  int32  i8 =  18;
+  int32  i9 =  19;
+
+  bytes  b1 =  21;
+  bytes  b2 =  22;
+  bytes  b3 =  23;
+  bytes  b4 =  24;
+
+  string  s1 =  31;
+  string  s2 =  32;
+  string  s3 =  33;
+  string  s4 =  34;
+
+}
+
+// Used for Desfire Record Writing to ensure we can quickly determine the age of record we are reading/writing
+// Safety since we can safeguard the data for X seconds before we overwrite on a cyclic record
+message SafetyRecord {
+  uint32 timestamp = 1;
+  bytes data = 2;
+}
+
+message Ident {
+  string chipid = 1;
+  
+  // from const esp_app_desc_t *app_desc = esp_ota_get_app_description();
+  string app_project_name = 2;
+  string app_version = 3;
+  string app_date = 4;
+  string app_time = 5;
+  string app_idf_ver = 6;
+}
+
+// Legacy Pipe: GAS|v:3.7|i:-221.2|soc:47.6|cycles:16|age:140|ttf:0|tte:556|bq8:2C|bq9:00,00,00
+message Gas {
+  float voltage = 1;
+  float current = 2;
+  float state_of_charge = 3;
+  uint32 cycles = 4;
+  uint32 age = 5;
+  uint32 time_to_full = 6;
+  uint32 time_to_empty = 7;
+  uint32 bq8 = 18;
+  bytes bq9 = 19;
+}
+
+// Legacy Pipe: clr/b4e62ddd1ad1/toserver/wifista WIFISTA|BSSID:909F33C7AF46|SSID:OkieDokie|chan1:12|rssi:-21|11b:1|11g:1|11n:1|cc:0000|schan:0|nchan:0
+message Wifista {
+  string bssid = 1;
+  string ssid = 2;
+  uint32 channel_primary = 3;
+  int32 rssi = 4;
+  bool is_11b = 10;
+  bool is_11g = 11;
+  bool is_11n = 12;
+  string country = 20;
+  uint32 channel_start = 21;
+  uint32 channel_count = 22;
+}
+
+message Activated {
+  string type = 1;
+  bytes uid = 2;
+  uint32 sak = 3;
+  bytes atqa = 4;
+}
+
+message Deactivated {
+  bytes uid = 2;
+}
+
+message LcdDisplay {
+  string line1 = 1;
+  string line2 = 2;
+  uint32 duration_ms = 3;
+  bool backlight = 4;
+}
+
+
+message Checkpoint {
+  uint32 id = 1;
+  string name = 2;
+  uint32 starts_at = 3;
+  uint32 ends_at = 4;
+  string required_options = 5;
+  string strike_options = 6;
+  string allowed_options = 7;
+  string code = 8;
+  uint32 scan_limit = 9;
+  uint32 min_level_1 = 10;
+  uint32 max_level_1 = 11;
+  uint32 led_ok_ms = 12;
+  uint32 led_fail_ms = 13;
+  uint32 price = 14;
+  bool stars_allowed = 15;
+  uint32 stars_price = 16;
+}
+
+message CheckpointArray {
+  repeated Checkpoint checkpoints = 1;
+}
+
+
+message KeySpec {
+  string protocol = 1; // AES 128
+  uint32 number = 2;   // KeyStore.Key = 1
+  uint32 position = 3; // KeyStore.Key + Position Offset
+  uint32 version = 4;  // KeyStore.Version = 0 (shove into that Position Offset)
+  bytes  rawbytes = 5; // Key Bytes in Binary
+  string usage = 6;    // "PICCMaster"
+  bool   diversify_by_swcmac = 10; // Enable Key Diversification by our own CMAC (more modern)
+  bool   diversify_by_keystore = 11; // Enable NXPReaderLib Key Diversification (does it the stupid old way)
+  bool   diversify_by_samav1 = 12; // Enable Key Diversification by SAMAV1
+  bool   diversify_by_samav2 = 13; // Enable Key Diversification by SAMAV2
+  bool   diversify_by_samav3 = 14; // Enable Key Diversification by SAMAV3
+}
+
+message KeyRing {
+  repeated KeySpec keys = 1;
+}

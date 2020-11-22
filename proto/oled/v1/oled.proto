@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package oled.v1;
+option go_package = "oled/v1;oled";
+
+message Opage {
+  int64 expires_at   = 1; // Do not display after this unix time
+  string headline   = 2; // Headline large - takes 2 lines
+  string line0 = 3;
+  string line1 = 4;
+  string line2 = 5;
+  string line3 = 6;
+  string line4 = 7;
+  string line5 = 8;
+  string line6 = 9;
+  string line7 = 10;
+
+  string key   = 20; // Key by which to add/remove/update this opage
+}

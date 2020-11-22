@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+import "ffruit/v1/ffruit.proto";
+
+package dfruit.v1;
+option go_package = "dfruit/v1;dfruit_v1";
+
+
+message DfruitConfig {
+
+  // Ultrafly Integration
+  string mqtt_uri = 5;
+  string mqtt_username = 6;
+  string mqtt_password = 7;
+  string mqtt_client_id = 8;
+
+  string uksr_state = 9;
+  string mineral_path = 10; // License path 
+
+  string watch_zone = 11; // belt, shelf
+  int32 attach_rssi = 12;
+  int32 detach_rssi = 13;
+
+  // Extra inventory rounds after Box trigger                                                                                    
+  int32 inventory_settling_rounds = 15; // typically 1 to be sure, but can reduce to 0 if single antenna
+
+  // MySQL
+  string gorm_db_engine = 80; // Example: "mysql"
+  string gorm_db_url = 81; // Example: "username:password@(hostname)/database?charset=utf8mb4&parseTime=True&loc=Local"
+
+  // Debug
+  int32 dummy_wait_ms = 90; // Example: 500, typically don't use
+}
+
+message DfruitStateMessage {
+  int32 error = 1;
+  int32 antenna_no = 2;
+  string state = 3; // Restart, AwaitBox, ReadTag, SendWeight, AwaitWeight, LogResult, Error
+}
+
+message DfruitStatus {
+  string error = 1;   // Inform UI about Error Problem
+  string message = 2; // Just annoucing state
+}
+
+// Add application signature to EPC Bank
+message DfruitSignEpc {
+  string epc = 1; // HexString (must decode if you want Binary)
+  bytes app_id = 2;
+  bytes key = 3; // Typically not provided because setup_fruit can determine based on AppId
+
+  bytes tid = 4; // Used to generate new EPC
+  bytes serial_bytes = 5; // Alternative to TID.  If supplied will override TID
+
+  bytes company_bytes = 6; // Company Identiifer 2 bytes
+  bytes product_bytes = 7; // Product Identiifer 2 bytes
+
+
+  bool force = 20; // sign even if seems signed
+}
+
+// Add application signature to EPC Bank
+message DfruitPrepareReservedBlock {
+  string epc = 1; // HexString (must decode if you want Binary)
+  bool force = 2; // sign even if seems signed
+}
+
+// Add signed tag to our database of recognized tags (useful for factory to detect strange tag insert)
+message DfruitRegisterBox {
+  string epc = 1; // HexString (must decode if you want Binary)
+  bytes app_id = 2;
+}
+
+// Fill User Bank with default info
+message DfruitUserBankInit {
+  string epc = 1; // HexString (must decode if you want Binary)
+  bytes app_id = 2;
+}
+
+// Fill User Bank with default info
+message DfruitUserBankInitSpecialCommand {
+  string epc = 1; // HexString (must decode if you want Binary)
+  bytes app_id = 2;
+  ffruit.v1.FfruitSpecialCommand command = 3;
+}
+
+message DfruitBarcode {
+  string scanned = 1;   // Whatever the QR Code Scanner types in 
+  string confirmed = 2; // The result of what Depot Fruit will allow
+}
+
+message DfruitOperation {
+  string initial_epc_bank = 1; // What Dfruit initially saw
+  string initial_tid_bank = 2; // What Dfruit initially saw
+  string initial_user_bank = 3; // What Dfruit initially saw
+
+  string barcode_as_scanned = 4;   // What we scanned in
+  string barcode_as_confirmed = 5;   // What we will rename things to
+
+  string final_epc = 10;   // What we will rename things to
+  bool final_epc_found = 11; // true if we have located the renamed EPC
+  bool tag_locked = 20; // true if we have locked the renamed EPC
+}

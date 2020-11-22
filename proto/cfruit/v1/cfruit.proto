@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package cfruit.v1;
+option go_package = "cfruit/v1;cfruit_v1";
+
+message CfruitConfig {
+  // Ultrafly Integration
+  string mqtt_uri = 5; // Example: "tcp://mosquitto:1883"
+  string mqtt_username = 6;
+  string mqtt_password = 7;
+  string mqtt_client_id = 8;
+
+  string uksr_state = 9;
+  string mineral_path = 10; // License path 
+
+  string iz7k_listen_spec = 2; // Example: ":2048"
+  string gorm_db_engine = 3; // Example: "mysql"
+  string gorm_db_url = 4; // Example: "username:password@(hostname)/database?charset=utf8mb4&parseTime=True&loc=Local"
+
+  string clearly_mac = 20; // 12.hex
+
+  string item_primary_field = 30; // ItemNo
+  uint32 safety_record_seconds = 31; //  how long to hold nfc records for
+
+  uint32 rssi_attach = 41; //  Minimum RSSI of UHF Tag to qualify for "On Scale"
+  uint32 rssi_detach = 42; // RSSI Below which we will remove interest for tag
+
+  uint32 farmer_card_grace = 51; // Number of seconds to wait for farmer card to be presented after basket read
+}
+
+message CfruitStateMessage {
+  int32 error = 1;
+  int32 antenna_no = 2;
+  string state = 3; // Restart, AwaitBox, ReadTag, SendWeight, AwaitWeight, LogResult, Error
+}
+
+
+message CfruitStatus {
+  string error = 1;   // Inform UI about Error Problem
+  string message = 2; // Just annoucing state
+}
+
+
+// TODO: Define message carriers between UHF and NFC
+// Fill User Bank with default info
+message CfruitUserBankData {
+  string epc = 1; // HexString (must decode if you want Binary)
+  bytes app_id = 2;
+}

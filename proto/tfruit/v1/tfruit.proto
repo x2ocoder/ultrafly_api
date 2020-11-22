@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+import "ffruit/v1/ffruit.proto";
+
+package tfruit.v1;
+option go_package = "tfruit/v1;tfruit_v1";
+
+// Reusable - UHF Config
+// Debug -> UHF  uhf_req/UltraflyConfiguration
+// UHF -> DEBUG  uhf_res/UltraflyConfiguration
+message UltraflyConfiguration {
+  uint32 timestamp = 1;
+  uint32 input_gpio_1 = 11; // Define which linux GPIO pin is used for the respective GPIO
+  uint32 input_gpio_2 = 12;
+  uint32 input_gpio_3 = 13;
+  uint32 input_gpio_4 = 14;
+  uint32 output_gpio_1 = 21;
+  uint32 output_gpio_2 = 22;
+  uint32 output_gpio_3 = 23;
+  uint32 output_gpio_4 = 24;
+  uint32 output_gpio_5 = 25;
+  uint32 output_gpio_6 = 26;
+}
+// CMAC Message Envelope
+// Used for darn near everything possible between UHF <-> NFC (may be spied upon by web ui)
+// Helps to prevent tampering of data
+message UltraflySignedMessage {
+  bytes topic = 1; // Protobuf Type (since can't be detected from data)
+  bytes data = 2; // Protobuf Wire Serialized Data
+  bytes sig = 3; // CMAC Signature = CMAC(secret, topic+data)
+}
+// Reusable - UHF & NFC Connection
+// via nfc_req/ReaderPing - Hi Reader, are you there? What time is it?
+message ReaderPing {
+  bytes ultrafly_uid = 1;
+  uint32 station = 3;
+}
+
+// Reusable - UHF & NFC Connection
+// via nfc_res/ReaderPing - I'm here, the time is X
+message ReaderPong {
+  bytes clearly_uid = 1;
+  uint32 timestamp = 2;
+}
+
+// Very specific to Ishida Trusted Fruit System
+// UHF -> NFC - I have 1234 grams of high quality fruit!
+message BasketScanInfo { // this message is good for darn near everything, so we're using it for NFC (exclude card) and UHF logging (exclude bakset_uid)
+  bytes basket_uid = 1;
+  uint32 timestamp = 2;
+  uint32 station = 3; // Unused Manufactuer number
+  uint32 collector = 4; // Unused Operator
+  uint32 farmer = 5; // Filled in with data from NFC Scanner 
+  uint32 card = 6; // Filled in with data from NFC Scanner
+  uint32 product = 7;
+  float weight = 8;
+  string weight_uom = 9;
+  uint32 machine_number = 10; // Use this instead of station
+  ffruit.v1.FfruitSpecialCommand command = 20; // Typical: Not placed on a typical UHF Tag - only special use at the factory internal
+}
+
+// NFC -> UHF - via uhf_req/CardScanInfo - "I saw this farmer/collector"
+message CardScanInfo {
+  uint32 timestamp = 1;
+  bytes  card_uid  = 2;
+  uint32 collector = 4;
+  uint32 farmer    = 5;
+}
+
+// Very specific to Ishida Trusted Fruit System
+// UHF -> NFC - via nfc_req/StationInfo - "Okay here's the station status"
+message StationInfo {
+  uint32 timestamp = 1;
+  uint32 collector = 2;
+
+  bytes  basket_uid  = 3;
+  bytes  card_uid  = 4;
+
+  string system_online = 5; // Collector #123
+
+  string infoline1 = 6; // Collector #123           |  Weight 2345g     | System Online   | System Standby
+  string infoline2 = 7; // Logged In  |  Logged Out |  Farmer Confirm?  | Present Basket  | Collector Login?
+}
+
+enum FfruitSpecialCommand {
+  IGNORE_ME = 0x00; // Tell Ffruit Program: Do nothing
+  REDO_PRESET = 0x01; // Tell Ffruit Program: Send this special basket to DACS and read new Preset ####
+}
+
+// Very specific to Ishida Trusted Fruit System
+// UHF -> NFC - via nfc_req/TfruitBasketMessage > "I have 1234 grams of high quality fruit!" Please Add this crypto(Record) to the NFC Card
+// NFC -> UHF - via nfc_res/TfruitBasketMessage > "Farmer 234 agrees with the weight"        Please Add this signed(Record) to the UHF Card 
+message TfruitBasketMessage { // 31 bytes nominal + UltraflySignedMessage Wrapper(Topic: "TBM", Data: .., Sig..) 10 byte overhead nominal  + APPID 4 + LEN 1 = 46 bytes => (H3 = 64 Bytes - Within Range)
+  bytes basket_uid = 1;  // Typical 1+4 Byte // TODO: determine if this is worth using (probably not)
+  uint32 timestamp = 2;  // Typical 1+4 Byte
+  uint32 station = 3;    // Typical 1+2 Byte
+  uint32 collector = 4;  // Typical 1+2 Byte
+  uint32 farmer = 5;     // Typical 1+4 Byte Impossible for UHF Scanner/Scale to Know // Provided by NFC Scanner on result
+  uint32 product = 6;    // Typical 1+2 Byte
+  float weight = 7;     // Typical 1+4 Byte
+  string weight_uom = 8; // Typical 1+1 Byte
+  uint32 reset_timestamp = 9;  // Typical 1+4 Byte // TODO: determine if this is worth using
+  uint32 farmer_card = 10;     // Typical 1+4 Byte Impossible for UHF Scanner/Scale to Know // Provided by NFC Scanner on result
+  ffruit.v1.FfruitSpecialCommand command = 20; // Typical: Not placed on a typical UHF Tag - only special use at the factory internal
+}
+
+// UHF -> NFC - Please Add this Record to the NFC Card
+message BasketLogRequest {
+  TfruitBasketMessage tfruit_basket = 1;
+}
+
+// NFC -> UHF - This is the complete record I recorded
+message BasketLogResponse {
+  bytes basket_uid = 1;
+  uint32 timestamp = 2;
+  uint32 station = 3;
+  uint32 collector = 4;
+  uint32 farmer = 5; // Filled in by NFC Scanner on result
+  uint32 product = 6;
+  float weight = 7;
+  string weight_uom = 8;
+}
+
+
+// UHF -> Debug
+message UltraflyStatusResponse {
+  uint32 timestamp = 1;
+  bool input1 = 11;
+  bool input2 = 12;
+  bool input3 = 13;
+  bool input4 = 14;
+  bool output1 = 21;
+  bool output2 = 22;
+  bool output3 = 23;
+  bool output4 = 24;
+  bool output5 = 25;
+  bool output6 = 26;
+  UltraflyConfiguration  ultrafly_configuration = 50;
+}
+
+// Set CMAC Key
+// via uhf_req/UltraflySignKeySetRequest
+message UltraflySignKeySetRequest {
+  bytes nfc_key_mask = 1;   // For use UHF<->NFC: AES128 16 Byte Key     Key = KeyMask ^ "SUPERFLYDUPERFLY" 
+  bytes debug_key_mask = 2; // For use UHF<->Debug: AES128 16 Byte Key   Key = KeyMask ^ "SUPERFLYDUPERFLY" 
+}
+// via uhf_res/UltraflySignKeySetResponse
+message UltraflySignKeySetResponse {
+  bool success = 1;
+}
+
+message ContactInfo {
+  uint32 id = 1;    // Internal DB #
+  string name = 2;  // Culture independent full name
+  string phone = 3;
+  string email = 4;
+}
+

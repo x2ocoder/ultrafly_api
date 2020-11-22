@@ -1,0 +1,2 @@
+brew tap bufbuild/buf
+brew install buf

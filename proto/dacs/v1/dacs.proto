@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package dacs.v1;
+option go_package = "dacs/v1;dacs_v1";
+
+message DacsCmdP {
+  int32 preset_number = 1; // format 4 digit: 0000 - 0200
+  int32 capacity = 2; // 0 Standard; 1 High Resolution
+  int32 weight_unit = 3; // 0 Gram; 1 Ounce
+  int32 weight_mode = 4; // 0 IFC - InFeed; 1 WTC - ; 2 IFC + WTC
+                                                 
+  double reference_weight = 5; // W8: The target 8 Characters 12345.78 : CRITICAL: Do not set to allow dynamic weight from UHF Tag
+  double upper_delta_amount = 6; // W8: Absolute allowable grams above ReferenceWeight, or multiplier against ReferenceWeigth if UpperDeltaMode is "%"
+  double lower_delta_amount = 7; // W8: Absolute allowable grams above ReferenceWeight, or multiplier against ReferenceWeigth if LowerDeltaMode is "%"
+
+  string upper_delta_mode = 8; // Internal Config: blank if absolute, "%" if % of ReferenceWeight
+  string lower_delta_mode = 9; // Internal Config: blank if absolute, "%" if % of ReferenceWeight
+                                  
+  int32 product_length_mm = 10; // 610 mm 
+                            
+  int32 reject_start_delay_right = 11; // ms = 0
+  int32 reject_on_time_right = 12; // ms = 0
+  int32 reject_start_delay_left = 13; // ms = 0
+  int32 reject_on_time_left = 14; // ms = 0
+
+  string product_name = 15; // == ""
+  string product_code = 16; // == ""
+                                
+  int32 over_weight_accept = 17; // *0 Off; 1 On
+  int32 metal_detection = 18; // 0 Off; *1 Metal Detect On; 2 Detect Lack of Metal
+   
+  double tare_weight = 19; // W8  12345.78 = 0.0
+  double nominal_weight = 20; // W8  12345.78 = 0.0
+  double t1_weight = 21; // W8  12345.78 = 0.0
+  double t2_weight = 22; // W8  12345.78 = 0.0
+                                 
+  int32 ext1_out_delay_time = 23; // ms = 0
+  int32 ext2_out_delay_time = 24; // ms = 0                                                                                
+  int32 ext3_out_delay_time = 25; // ms = 0
+  int32 ext4_out_delay_time = 26; // ms = 0
+  int32 ext5_out_delay_time = 27; // ms = 0
+  int32 ext6_out_delay_time = 28; // ms = 0
+  int32 ext1_input_delay_time = 29; // ms = 0
+  int32 ext2_input_delay_time = 30; // ms = 0                                                 
+                                                
+  int32 continuous_no_good_count = 31; // = 0
+  int32 infeed_conveyor_speed = 32; // m/min = 23
+  int32 weigh_conveyor_speed = 33; // m/min = 23
+  int32 reject_conveyor_speed = 34; // m/min = 23
+}      

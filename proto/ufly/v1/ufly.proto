@@ -1,0 +1,160 @@
+syntax = "proto3";
+
+package ufly.v1;
+option go_package = "ufly/v1;ufly_v1";
+
+message GpioRead {
+  int32 pin = 1; // TODO: change to uint32
+  int32 value = 2; // TODO: change to uint32
+  bool initial_state = 3; // Alert that this is not a transition, but just the startup state
+  string name = 4; // Alpha Name of GPIO
+}
+
+message GpioState { repeated GpioRead gpio_reads = 1; }
+
+message GpioWriteRequest {
+  uint32 request_id = 1;
+  uint32 pin = 2;
+  string pin_name = 3; // Allow request by pin name/function such as A/B/C/D or "Door", "Valve3"; Overrides Pin
+  uint32 value = 4; // 0 = Low, 1 = High ; If PulseMs is specified, then this will determine 0=Negative/1=Positive Logic
+  uint32 pulse_ms = 5;  // If > 0, then pulse from L->H then Wait PulseHighMs before dropping back H->L
+}
+
+message GpioWriteResponse {
+  uint32 request_id = 1;
+  bool success = 2;
+  string message = 3;
+  uint32 pin = 4;
+  uint32 value = 5;
+  uint32 pulse_ms = 6;
+  string pin_name = 7; // Allow request by pin name/function such as A/B/C/D or "Door", "Valve3"; Overrides Pin
+}
+
+message URadarStateMessage {
+  int32 power = 1;
+  int32 antenna_no = 2;
+  string message = 3; // General Message
+}
+
+
+// 
+message UTagMessage { // For URadar, this is like a notification of a tag sighting without any further meaning                              
+//      string epc       = 1;
+        int32 rssi       = 2;
+        int32 count      = 3;
+//      int32 last_seen  = 4;
+        int32 antenna_no = 5;
+        string zone      = 6;
+//      bool highlight   = 7;
+//      int32 staleness  = 8;
+}    
+
+// 
+// State is fairly simple: 
+//  New -- New Tag (Next Round: Transition to Existing)
+//  Existing -- Known Tag (Next Round: If seen -> Existing; If not seen -> Fading)
+//  Fading -- Known Tag can't see via UHF (Next Round: If seen -> Existing; If not seen -> Lost)
+//  Lost -- Known Tag, Can't see for a long time (Removed from known tag list)
+//
+// Type has more detail: 
+//  State=New, Type=New -- New Tag Entirely
+//  State=Existing, Type=ChangeZone (Antenna.Zone is not the same), 
+//  State=Existing, Type=ChangeAntenna (Antenna.Strongest is not the same), 
+//  State=Existing, Type=Motion (|RssiDelta| > OldRssi.10%)
+//  State=Existing, Type=Shimmer (|RssiDelta| > 4)
+//  State=Existing, Type=Static (|RssiDelta| <= 4)
+//  State=Fading, Type=Fading -- Can't see tag for a short time
+//  State=Lost, Type=Lost -- Can't see tag for a long time
+// 
+// Type vs State
+// Type = New, then State = New
+// Type = Lost, then State = Lost (uradar.go when tag is lost)
+//
+// Program Logic
+//   During Cycle URadarEvent -> URadar.Changes -> RunRadar -> CurrentURadarEventBuffer.Events.Store(epc, UradarEvent) -> URadarEventBufer.reportURadarEvents -> URadar.Rbell.NewURadarEvent -> MQTT/JSON->HTTP -> ufconnect -> <-rbell.NewURadarEvent -> ufly_v1.URadarEventMessage(recreate)->MQTT
+//
+// URadarEventMessage vs URadarEvent 
+//   URadarEvent has URadarEventMessage.UBlip*
+//          Where UBlip.UTags[] (key = AntennaNo, value = UTag{Zone, AntennaNo, Rssi} )
+message URadarEventMessage {
+  string epc = 1; // Consider calling this epc_hex because it's ascii hex (not binary epc)
+  string type = 2;     // new_, Existing (rare), Moving, Fading, Moved
+  string old_state = 3; // new_, Existing, Moving, Fading
+  string new_state = 4; // new_, Existing, Moving, Fading
+  string old_zone = 5;
+  string new_zone = 6;
+  int32 old_rssi = 7;
+  int32 new_rssi = 8;
+  int32 old_antenna_no = 9;
+  int32 new_antenna_no = 10;
+  repeated UTagMessage utags = 11;
+}
+
+message UBlipReadRequest {
+  int32 request_id = 1;
+  string epc = 2;
+  int32 bank = 3;
+  int32 offset = 4;
+  int32 words = 5;
+  bool  disable_epc_lookup  = 6; // Specify if you know which antenna and don't need UBlip Lookup
+  int32 antenna_no = 7;          // Specify if you know which antenna
+}
+message UBlipReadResponse {
+  int32 request_id = 1;
+  bool success = 2;
+  string message = 3;
+  string epc = 4;
+  int32 bank = 5;
+  bytes data = 6;
+}
+
+message UBlipWriteRequest {
+  int32 request_id = 1;
+  string epc = 2;
+  int32 bank = 3;
+  bytes data = 4;
+  int32 offset = 5;
+  int32 words = 6;
+  bytes access_password = 7;
+}
+message UBlipWriteResponse {
+  int32 request_id = 1;
+  bool success = 2;
+  string message = 3;
+  string epc = 4;
+}
+
+message UBlipLockRequest {
+  int32 request_id = 1;
+  string epc = 2;
+  int32 area = 3;
+  int32 type = 4;
+  bytes access_password = 7;
+}
+message UBlipLockResponse {
+  int32 request_id = 1;
+  bool success = 2;
+  string message = 3;
+  string epc = 4;
+}
+
+
+message UModeSet {
+  int32 request_id = 1;
+  bool inventory_enable = 2;
+  bool inventory_disable = 3;
+  int32 times = 4; // in case only a limited number of inventory rounds
+  bool auto_user_bank = 5; // when you get a matching T tag, automatically fetch the user bank
+  bool on_item_abort_inventory = 6; // if you find a T tag within the minimum_rssi, don't run the other antennas to save tie
+}
+
+
+// NOTE: Stolen from tfruit proto, but probabaly belongs here anyways
+// CMAC Message Envelope
+// Used for darn near everything possible between UHF <-> NFC (may be spied upon by web ui)
+// Helps to prevent tampering of data
+message UltraflySignedMessage {
+  bytes topic = 1; // Protobuf Type (since can't be detected from data)
+  bytes data = 2; // Protobuf Wire Serialized Data
+  bytes sig = 3; // CMAC Signature = CMAC(secret, topic+data)
+}
