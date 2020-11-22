@@ -3,8 +3,8 @@ syntax = "proto3";
 import "dacs/v1/dacs.proto";
 import "oneshelf/v1/oneshelf.proto";
 
-package ffruit.v1;
-option go_package = "ffruit/v1;ffruit_v1";
+package ultrafly_api.ffruit.v1;
+option go_package = "github.com/x2ocoder/ultrafly_api/buf/internal/gen/proto/go/ffruit/v1;ffruit_v1";
 
 
 
