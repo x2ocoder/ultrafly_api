@@ -2,8 +2,8 @@ syntax = "proto3";
 
 import "ffruit/v1/ffruit.proto";
 
-package ultrafly_api.tfruit.v1;
-option go_package = "github.com/x2ocoder/ultrafly_api/buf/internal/gen/proto/go/tfruit/v1;tfruit_v1";
+package tfruit.v1;
+option go_package = "github.com/x2ocoder/ultrafly_api/tfruit/v1;tfruit_v1";
 
 // Reusable - UHF Config
 // Debug -> UHF  uhf_req/UltraflyConfiguration

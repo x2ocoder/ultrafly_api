@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package oneshelf.v1;
-option go_package = "oneshelf/v1;oneshelf_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/oneshelf/v1;oneshelf_v1";
 
 message GpioMapping {
   uint32 pin_number   = 1; // GPIO # (Linux System level)

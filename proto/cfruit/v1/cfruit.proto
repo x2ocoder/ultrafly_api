@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package cfruit.v1;
-option go_package = "cfruit/v1;cfruit_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/cfruit/v1;cfruit_v1";
 
 message CfruitConfig {
   // Ultrafly Integration

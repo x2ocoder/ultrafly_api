@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package ufly.v1;
-option go_package = "ufly/v1;ufly_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/ufly/v1;ufly_v1";
 
 message GpioRead {
   int32 pin = 1; // TODO: change to uint32

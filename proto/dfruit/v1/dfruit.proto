@@ -3,7 +3,7 @@ syntax = "proto3";
 import "ffruit/v1/ffruit.proto";
 
 package dfruit.v1;
-option go_package = "dfruit/v1;dfruit_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/dfruit/v1;dfruit_v1";
 
 
 message DfruitConfig {

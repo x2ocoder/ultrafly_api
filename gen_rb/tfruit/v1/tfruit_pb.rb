@@ -6,7 +6,7 @@ require 'google/protobuf'
 require 'ffruit/v1/ffruit_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("tfruit/v1/tfruit.proto", :syntax => :proto3) do
-    add_message "ultrafly_api.tfruit.v1.UltraflyConfiguration" do
+    add_message "tfruit.v1.UltraflyConfiguration" do
       optional :timestamp, :uint32, 1
       optional :input_gpio_1, :uint32, 11
       optional :input_gpio_2, :uint32, 12
@@ -19,20 +19,20 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :output_gpio_5, :uint32, 25
       optional :output_gpio_6, :uint32, 26
     end
-    add_message "ultrafly_api.tfruit.v1.UltraflySignedMessage" do
+    add_message "tfruit.v1.UltraflySignedMessage" do
       optional :topic, :bytes, 1
       optional :data, :bytes, 2
       optional :sig, :bytes, 3
     end
-    add_message "ultrafly_api.tfruit.v1.ReaderPing" do
+    add_message "tfruit.v1.ReaderPing" do
       optional :ultrafly_uid, :bytes, 1
       optional :station, :uint32, 3
     end
-    add_message "ultrafly_api.tfruit.v1.ReaderPong" do
+    add_message "tfruit.v1.ReaderPong" do
       optional :clearly_uid, :bytes, 1
       optional :timestamp, :uint32, 2
     end
-    add_message "ultrafly_api.tfruit.v1.BasketScanInfo" do
+    add_message "tfruit.v1.BasketScanInfo" do
       optional :basket_uid, :bytes, 1
       optional :timestamp, :uint32, 2
       optional :station, :uint32, 3
@@ -45,13 +45,13 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :machine_number, :uint32, 10
       optional :command, :enum, 20, "ffruit.v1.FfruitSpecialCommand"
     end
-    add_message "ultrafly_api.tfruit.v1.CardScanInfo" do
+    add_message "tfruit.v1.CardScanInfo" do
       optional :timestamp, :uint32, 1
       optional :card_uid, :bytes, 2
       optional :collector, :uint32, 4
       optional :farmer, :uint32, 5
     end
-    add_message "ultrafly_api.tfruit.v1.StationInfo" do
+    add_message "tfruit.v1.StationInfo" do
       optional :timestamp, :uint32, 1
       optional :collector, :uint32, 2
       optional :basket_uid, :bytes, 3
@@ -60,7 +60,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :infoline1, :string, 6
       optional :infoline2, :string, 7
     end
-    add_message "ultrafly_api.tfruit.v1.TfruitBasketMessage" do
+    add_message "tfruit.v1.TfruitBasketMessage" do
       optional :basket_uid, :bytes, 1
       optional :timestamp, :uint32, 2
       optional :station, :uint32, 3
@@ -73,10 +73,10 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :farmer_card, :uint32, 10
       optional :command, :enum, 20, "ffruit.v1.FfruitSpecialCommand"
     end
-    add_message "ultrafly_api.tfruit.v1.BasketLogRequest" do
-      optional :tfruit_basket, :message, 1, "ultrafly_api.tfruit.v1.TfruitBasketMessage"
+    add_message "tfruit.v1.BasketLogRequest" do
+      optional :tfruit_basket, :message, 1, "tfruit.v1.TfruitBasketMessage"
     end
-    add_message "ultrafly_api.tfruit.v1.BasketLogResponse" do
+    add_message "tfruit.v1.BasketLogResponse" do
       optional :basket_uid, :bytes, 1
       optional :timestamp, :uint32, 2
       optional :station, :uint32, 3
@@ -86,7 +86,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :weight, :float, 7
       optional :weight_uom, :string, 8
     end
-    add_message "ultrafly_api.tfruit.v1.UltraflyStatusResponse" do
+    add_message "tfruit.v1.UltraflyStatusResponse" do
       optional :timestamp, :uint32, 1
       optional :input1, :bool, 11
       optional :input2, :bool, 12
@@ -98,46 +98,44 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :output4, :bool, 24
       optional :output5, :bool, 25
       optional :output6, :bool, 26
-      optional :ultrafly_configuration, :message, 50, "ultrafly_api.tfruit.v1.UltraflyConfiguration"
+      optional :ultrafly_configuration, :message, 50, "tfruit.v1.UltraflyConfiguration"
     end
-    add_message "ultrafly_api.tfruit.v1.UltraflySignKeySetRequest" do
+    add_message "tfruit.v1.UltraflySignKeySetRequest" do
       optional :nfc_key_mask, :bytes, 1
       optional :debug_key_mask, :bytes, 2
     end
-    add_message "ultrafly_api.tfruit.v1.UltraflySignKeySetResponse" do
+    add_message "tfruit.v1.UltraflySignKeySetResponse" do
       optional :success, :bool, 1
     end
-    add_message "ultrafly_api.tfruit.v1.ContactInfo" do
+    add_message "tfruit.v1.ContactInfo" do
       optional :id, :uint32, 1
       optional :name, :string, 2
       optional :phone, :string, 3
       optional :email, :string, 4
     end
-    add_enum "ultrafly_api.tfruit.v1.FfruitSpecialCommand" do
+    add_enum "tfruit.v1.FfruitSpecialCommand" do
       value :IGNORE_ME, 0
       value :REDO_PRESET, 1
     end
   end
 end
 
-module UltraflyApi
-  module Tfruit
-    module V1
-      UltraflyConfiguration = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.UltraflyConfiguration").msgclass
-      UltraflySignedMessage = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.UltraflySignedMessage").msgclass
-      ReaderPing = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.ReaderPing").msgclass
-      ReaderPong = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.ReaderPong").msgclass
-      BasketScanInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.BasketScanInfo").msgclass
-      CardScanInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.CardScanInfo").msgclass
-      StationInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.StationInfo").msgclass
-      TfruitBasketMessage = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.TfruitBasketMessage").msgclass
-      BasketLogRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.BasketLogRequest").msgclass
-      BasketLogResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.BasketLogResponse").msgclass
-      UltraflyStatusResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.UltraflyStatusResponse").msgclass
-      UltraflySignKeySetRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.UltraflySignKeySetRequest").msgclass
-      UltraflySignKeySetResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.UltraflySignKeySetResponse").msgclass
-      ContactInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.ContactInfo").msgclass
-      FfruitSpecialCommand = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ultrafly_api.tfruit.v1.FfruitSpecialCommand").enummodule
-    end
+module Tfruit
+  module V1
+    UltraflyConfiguration = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.UltraflyConfiguration").msgclass
+    UltraflySignedMessage = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.UltraflySignedMessage").msgclass
+    ReaderPing = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.ReaderPing").msgclass
+    ReaderPong = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.ReaderPong").msgclass
+    BasketScanInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.BasketScanInfo").msgclass
+    CardScanInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.CardScanInfo").msgclass
+    StationInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.StationInfo").msgclass
+    TfruitBasketMessage = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.TfruitBasketMessage").msgclass
+    BasketLogRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.BasketLogRequest").msgclass
+    BasketLogResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.BasketLogResponse").msgclass
+    UltraflyStatusResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.UltraflyStatusResponse").msgclass
+    UltraflySignKeySetRequest = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.UltraflySignKeySetRequest").msgclass
+    UltraflySignKeySetResponse = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.UltraflySignKeySetResponse").msgclass
+    ContactInfo = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.ContactInfo").msgclass
+    FfruitSpecialCommand = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("tfruit.v1.FfruitSpecialCommand").enummodule
   end
 end

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package dacs.v1;
-option go_package = "dacs/v1;dacs_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/dacs/v1;dacs_v1";
 
 message DacsCmdP {
   int32 preset_number = 1; // format 4 digit: 0000 - 0200

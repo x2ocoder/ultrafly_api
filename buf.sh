@@ -12,4 +12,4 @@
 mkdir -p gen
 mkdir -p gen_rb
 mkdir -p rvue/src/buf
-buf image build -o - | protoc --descriptor_set_in=/dev/stdin --go_out=. --js_out=import_style=commonjs,binary:rvue/src/buf --ruby_out=gen_rb $(buf image build -o - | buf ls-files --input -)
+buf image build -o - | protoc --descriptor_set_in=/dev/stdin --go_out=paths=source_relative:. --js_out=import_style=commonjs,binary:rvue/src/buf --ruby_out=gen_rb $(buf image build -o - | buf ls-files --input -)

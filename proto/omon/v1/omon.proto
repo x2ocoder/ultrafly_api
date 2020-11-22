@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package omon.v1;
-option go_package = "omon/v1;omon_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/omon/v1;omon_v1";
 
 message OmonConfig {
   // Ultrafly Integration

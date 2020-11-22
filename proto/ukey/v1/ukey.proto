@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package ukey.v1;
-option go_package = "ukey/v1;ukey_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/ukey/v1;ukey_v1";
 
 // message UkeySetRequest {  // For the sake of sanity, we send a UkeySetRequest with a Ukey body so that it can be used immediately upon Unmarshal with other utilities
 message Ukey {

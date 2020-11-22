@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package clearly.v1;
-option go_package = "clearly/v1;clearly_v1";
+option go_package = "github.com/x2ocoder/ultrafly_api/clearly/v1;clearly_v1";
 
 message Debug {
   string key = 1;

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package oled.v1;
-option go_package = "oled/v1;oled";
+option go_package = "github.com/x2ocoder/ultrafly_api/oled/v1;oled";
 
 message Opage {
   int64 expires_at   = 1; // Do not display after this unix time
